@@ -1,0 +1,38 @@
+{
+  "name": "whatsapp-integration",
+  "version": "1.0.0",
+  "description": "WhatsApp Cloud API integration with internal business database",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server/app.js",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
+    "install-all": "npm install && npm run install-server && npm run install-client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "cd client && npm run build",
+    "setup-mcp": "bash setup-mcp.sh",
+    "setup-mcp-win": "setup-mcp.bat",
+    "start-mcp": "cd whatsapp-mcp-server && npm start",
+    "dev-with-mcp": "concurrently \"npm run server\" \"npm run client\" \"npm run start-mcp\"",
+    "test-mcp": "node test-mcp.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "api",
+    "integration",
+    "nodejs",
+    "react",
+    "postgresql"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
+  }
+} 

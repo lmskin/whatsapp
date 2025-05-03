@@ -1,0 +1,51 @@
+# PostgreSQL Database Configuration for WhatsApp Integration
+
+Your PostgreSQL database has been successfully set up with the following configuration:
+
+- Host: localhost
+- Port: 5432
+- Database Name: whatsapp_db
+- Username: postgres
+- Password: (the password you provided during setup)
+
+## Connection Details
+
+Please make sure your .env file includes these database configuration settings:
+
+```
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=whatsapp_db
+DB_USER=postgres
+DB_PASS=your_postgres_password
+```
+
+Replace `your_postgres_password` with the actual password you used during PostgreSQL installation.
+
+## Verifying the Connection
+
+You can verify the database connection by running:
+
+```powershell
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d whatsapp_db -c "SELECT * FROM orders LIMIT 2;"
+```
+
+## Tables Created
+
+The following tables have been created in the database:
+
+1. `messages` - Stores WhatsApp messages
+2. `orders` - Stores order information
+3. `mcp_sessions` - Stores user conversation context for the MCP server
+4. `mcp_training_logs` - Logs MCP training activity
+
+## Sample Data
+
+Sample order data has been added for testing purposes. You can view it with:
+
+```powershell
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d whatsapp_db -c "SELECT * FROM orders;"
+```
+
+Your database is now ready to be used with the WhatsApp integration project! 
