@@ -1,0 +1,7 @@
+version: "2"
+authtoken: 2wZeLwFXG4pCwNhiO9gSRX9b29J_212fqXWTG3gSC8sNrRNbN  # Replace with your actual ngrok auth token
+tunnels:
+  whatsapp:
+    addr: 80  # This points to localhost:80
+    proto: http
+    domain: annually-dashing-dolphin.ngrok-free.app 

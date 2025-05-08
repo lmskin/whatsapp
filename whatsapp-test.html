@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .box {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        h1 {
+            color: #25D366;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #128C7E;
+        }
+        .response {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            min-height: 100px;
+            overflow: auto;
+        }
+        .messages {
+            margin-top: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #25D366;
+        }
+    </style>
+</head>
+<body>
+    <h1>WhatsApp API Tester</h1>
+    <div class="container">
+        <div class="box">
+            <h2>Send Message</h2>
+            <form id="sendMessageForm">
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="text" id="phoneNumber" placeholder="e.g., 85294724949" required>
+                
+                <label for="message">Message:</label>
+                <textarea id="message" rows="4" placeholder="Enter your message here" required></textarea>
+                
+                <button type="submit">Send Message</button>
+            </form>
+            <div class="response" id="sendResponse">
+                <em>Response will appear here</em>
+            </div>
+        </div>
+        
+        <div class="box">
+            <h2>Recent Messages</h2>
+            <button id="fetchMessages">Fetch Messages</button>
+            <div class="response" id="fetchResponse">
+                <em>Response will appear here</em>
+            </div>
+            <div class="messages" id="messagesList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Send Message
+        document.getElementById('sendMessageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const responseArea = document.getElementById('sendResponse');
+            responseArea.innerHTML = 'Sending message...';
+            
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const message = document.getElementById('message').value;
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: phoneNumber,
+                        message: message
+                    })
+                });
+                
+                const data = await response.json();
+                responseArea.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                // If successful, clear the form
+                if (response.ok) {
+                    document.getElementById('message').value = '';
+                }
+            } catch (error) {
+                responseArea.innerHTML = '<pre style="color: red;">Error: ' + error.message + '</pre>';
+            }
+        });
+        
+        // Fetch Messages
+        document.getElementById('fetchMessages').addEventListener('click', async function() {
+            const responseArea = document.getElementById('fetchResponse');
+            const messagesList = document.getElementById('messagesList');
+            responseArea.innerHTML = 'Fetching messages...';
+            messagesList.innerHTML = '';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/messages');
+                const data = await response.json();
+                
+                responseArea.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                // Display messages
+                if (data.messages && data.messages.length) {
+                    data.messages.forEach(msg => {
+                        const messageEl = document.createElement('div');
+                        messageEl.className = 'message';
+                        messageEl.innerHTML = `
+                            <strong>${msg.from || 'Unknown'}</strong>
+                            <p>${msg.content}</p>
+                            <small>${new Date(msg.timestamp).toLocaleString()}</small>
+                        `;
+                        messagesList.appendChild(messageEl);
+                    });
+                } else {
+                    messagesList.innerHTML = '<p>No messages found</p>';
+                }
+            } catch (error) {
+                responseArea.innerHTML = '<pre style="color: red;">Error: ' + error.message + '</pre>';
+            }
+        });
+    </script>
+</body>
+</html> 

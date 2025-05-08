@@ -1,7 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-require('dotenv').config({ path: '../.env-example' });
+const fs = require('fs');
+const path = require('path');
+
+// Check if .env exists, otherwise use .env-example
+const envPath = fs.existsSync(path.resolve(__dirname, '../.env')) 
+  ? '../.env' 
+  : '../.env-example';
+  
+console.log(`Loading environment variables from ${envPath}`);
+require('dotenv').config({ path: envPath });
 
 // Import routes
 const messageRoutes = require('./routes/messages');
@@ -33,6 +42,8 @@ app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`MCP Server integration configured at: ${process.env.MCP_ENDPOINT || 'http://localhost:4000'}`);
   console.log(`WhatsApp verify token: ${process.env.WA_VERIFY_TOKEN}`);
+  console.log(`WhatsApp API version: ${process.env.WA_API_VERSION}`);
+  console.log(`WhatsApp Phone Number ID: ${process.env.WA_PHONE_NUMBER_ID}`);
   
   // Initialize MCP server with default examples
   try {

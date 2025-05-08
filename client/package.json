@@ -38,5 +38,9 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:3001"
+  "proxy": "http://localhost:3001",
+  "devDependencies": {
+    "terser-webpack-plugin": "^5.3.10",
+    "workbox-webpack-plugin": "^6.6.1"
+  }
 }
