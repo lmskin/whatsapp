@@ -9,8 +9,11 @@ CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   wa_user_id TEXT NOT NULL,
   content TEXT,
+  message_type TEXT DEFAULT 'text',
   is_outgoing BOOLEAN DEFAULT FALSE,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  status TEXT,
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE orders (

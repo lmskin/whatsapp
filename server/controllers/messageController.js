@@ -45,15 +45,17 @@ exports.sendMessage = async (req, res) => {
     const result = await whatsappService.sendMessage(to, message);
     
     // Save outgoing message
-    await messageService.saveMessage({
+    const savedMessage = await messageService.saveMessage({
       wa_user_id: to,
       content: message,
-      is_outgoing: true
+      message_type: 'text',
+      is_outgoing: true,
+      status: 'sent'
     });
     
     return res.status(200).json({
       success: true,
-      messageId: result.messages?.[0]?.id,
+      messageId: savedMessage.id,
       recipient: to
     });
   } catch (error) {

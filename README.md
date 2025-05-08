@@ -70,7 +70,26 @@ WA_API_VERSION=v17.0
 PORT=3001
 ```
 
-### 3. Start PostgreSQL
+### 3. Set Up the Database
+
+1. Create a PostgreSQL database:
+```sql
+CREATE DATABASE whatsapp_db;
+```
+
+2. Run the schema creation script from `db/setup.sql`:
+```bash
+psql -U postgres -d whatsapp_db -f db/setup.sql
+```
+
+3. Apply database migrations:
+```bash
+npm run migrate
+```
+
+4. Create a `.env` file in the root directory with your database and WhatsApp credentials.
+
+### 4. Start PostgreSQL
 
 Set up your schema:
 
@@ -91,7 +110,7 @@ CREATE TABLE orders (
 );
 ```
 
-### 4. Start Backend & Frontend
+### 5. Start Backend & Frontend
 
 **Backend:**
 ```
@@ -107,7 +126,7 @@ npm install
 npm start
 ```
 
-### 5. Expose Localhost with ngrok
+### 6. Expose Localhost with ngrok
 
 Install ngrok:
 
@@ -133,7 +152,7 @@ Copy the generated HTTPS URL, e.g.:
 https://abc123.ngrok.io
 ```
 
-### 6. Register Webhook in Meta App
+### 7. Register Webhook in Meta App
 
 In your WhatsApp App Settings:
 
@@ -219,12 +238,17 @@ This will install:
 CREATE DATABASE whatsapp_db;
 ```
 
-2. Run the schema creation script from `db/schema.sql`:
+2. Run the schema creation script from `db/setup.sql`:
 ```bash
-psql -U postgres -d whatsapp_db -f db/schema.sql
+psql -U postgres -d whatsapp_db -f db/setup.sql
 ```
 
-3. Create a `.env` file in the root directory with your database and WhatsApp credentials.
+3. Apply database migrations:
+```bash
+npm run migrate
+```
+
+4. Create a `.env` file in the root directory with your database and WhatsApp credentials.
 
 ### 4. Start the Development Environment
 

@@ -41,7 +41,6 @@ exports.saveMessage = async (messageData) => {
   try {
     const { 
       wa_user_id, 
-      wa_message_id, 
       content, 
       message_type,
       is_outgoing 
@@ -49,14 +48,13 @@ exports.saveMessage = async (messageData) => {
     
     const query = `
       INSERT INTO messages 
-      (wa_user_id, wa_message_id, content, message_type, is_outgoing, timestamp) 
-      VALUES ($1, $2, $3, $4, $5, NOW()) 
+      (wa_user_id, content, message_type, is_outgoing, timestamp) 
+      VALUES ($1, $2, $3, $4, NOW()) 
       RETURNING *
     `;
     
     const values = [
-      wa_user_id, 
-      wa_message_id || null, 
+      wa_user_id,
       content, 
       message_type || 'text', 
       is_outgoing || false
@@ -73,7 +71,7 @@ exports.saveMessage = async (messageData) => {
 
 /**
  * Update message status
- * @param {string} messageId - WhatsApp message ID
+ * @param {string} messageId - Message ID
  * @param {string} status - Message status (sent, delivered, read, failed)
  * @returns {Promise<Object>} - Updated message
  */
@@ -83,7 +81,7 @@ exports.updateMessageStatus = async (messageId, status) => {
       UPDATE messages 
       SET status = $1, 
           updated_at = NOW() 
-      WHERE wa_message_id = $2 
+      WHERE id = $2 
       RETURNING *
     `;
     
