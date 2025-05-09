@@ -38,9 +38,54 @@ project-root/
 │   ├── services/
 │   └── app.js
 ├── db/                     # PostgreSQL schema/migrations
-├── .env
+├── config/                 # Configuration files
+│   ├── .env-example
+│   ├── db-config.txt
+│   ├── mcp-flow.txt
+│   └── ngrok.yml
+├── scripts/                # Setup and start scripts
+│   ├── setup/              # Setup scripts
+│   │   ├── setup-database.bat/.ps1/.sh
+│   │   ├── setup-mcp.bat/.sh
+│   │   └── create-env.bat/.ps1
+│   └── start/              # Start scripts
+│       ├── start-all-services.bat/.ps1
+│       ├── start-ui.bat
+│       ├── start-with-ngrok.bat/.ps1/.sh
+│       └── start-client.js
+├── whatsapp-mcp-server/    # MCP Server implementation
+├── .env                    # Environment variables
 └── README.md
 ```
+
+## 📜 Available npm Scripts
+
+For convenience, this project provides several npm scripts to help you set up and run the application. You can run them with `npm run <script-name>`:
+
+| Script Name     | Description                                               |
+|-----------------|-----------------------------------------------------------|
+| `install-all`   | Install dependencies for root, server, and client         |
+| `dev`           | Start both server and client for development              |
+| `server`        | Start only the backend server                             |
+| `client`        | Start only the React frontend                             |
+| `build`         | Build the React frontend for production                   |
+| `start`         | Start the production server                               |
+| `setup-mcp`     | Set up the MCP server (Linux/macOS)                       |
+| `setup-mcp-win` | Set up the MCP server (Windows)                           |
+| `start-mcp`     | Start the MCP server                                      |
+| `dev-with-mcp`  | Start server, client, and MCP server together             |
+| `start-ui`      | Start the UI using the batch script                       |
+| `start-all`     | Start all services using batch script                     |
+| `start-all-ps`  | Start all services using PowerShell script                |
+| `start-ngrok`   | Start ngrok tunnel using batch script                     |
+| `start-ngrok-ps`| Start ngrok tunnel using PowerShell script                |
+| `start-ngrok-sh`| Start ngrok tunnel using shell script (Linux/macOS)       |
+| `create-env`    | Create .env file using batch script                       |
+| `create-env-ps` | Create .env file using PowerShell script                  |
+| `setup-db`      | Set up database using batch script                        |
+| `setup-db-ps`   | Set up database using PowerShell script                   |
+| `setup-db-sh`   | Set up database using shell script (Linux/macOS)          |
+| `migrate`       | Run database migrations                                   |
 
 ## ⚙️ Setup Instructions
 
@@ -77,9 +122,16 @@ PORT=3001
 CREATE DATABASE whatsapp_db;
 ```
 
-2. Run the schema creation script from `db/setup.sql`:
+2. Run the database setup script using one of these commands:
 ```bash
-psql -U postgres -d whatsapp_db -f db/setup.sql
+# Windows Command Prompt
+npm run setup-db
+
+# Windows PowerShell
+npm run setup-db-ps
+
+# Linux/macOS
+npm run setup-db-sh
 ```
 
 3. Apply database migrations:
@@ -87,7 +139,14 @@ psql -U postgres -d whatsapp_db -f db/setup.sql
 npm run migrate
 ```
 
-4. Create a `.env` file in the root directory with your database and WhatsApp credentials.
+4. Create a `.env` file in the root directory with your database and WhatsApp credentials:
+```bash
+# Windows Command Prompt
+npm run create-env
+
+# Windows PowerShell
+npm run create-env-ps
+```
 
 ### 4. Start PostgreSQL
 
@@ -112,38 +171,62 @@ CREATE TABLE orders (
 
 ### 5. Start Backend & Frontend
 
-**Backend:**
+You can start all services with a single command:
+
+```bash
+# Windows Command Prompt
+npm run start-all
+
+# Windows PowerShell
+npm run start-all-ps
 ```
+
+Or start individual components:
+
+**Backend:**
+```bash
 cd server
 npm install
 npm run dev
 ```
 
 **Frontend:**
-```
+```bash
 cd client
 npm install
 npm start
+```
+
+Or use the frontend start script:
+```bash
+scripts\start\start-ui.bat
 ```
 
 ### 6. Expose Localhost with ngrok
 
 Install ngrok:
 
-```
+```bash
 npm install -g ngrok
 ```
 
 Authenticate:
 
-```
+```bash
 ngrok config add-authtoken <YOUR_NGROK_AUTH_TOKEN>
 ```
 
-Expose port 3001:
+Expose port 3001 using the provided script:
 
-```
-ngrok http 3001
+```bash
+# Windows Command Prompt
+npm run start-ngrok
+
+# Windows PowerShell
+npm run start-ngrok-ps
+
+# Linux/macOS
+npm run start-ngrok-sh
 ```
 
 Copy the generated HTTPS URL, e.g.:
@@ -196,7 +279,14 @@ In your WhatsApp App Settings:
 
 ## ✅ Optional: Integrate MCP Server
 
-- Set up [WhatsApp MCP server](https://github.com/msaelices/whatsapp-mcp-server)
+- Set up [WhatsApp MCP server](https://github.com/msaelices/whatsapp-mcp-server) using the provided scripts:
+```bash
+# On Linux/macOS
+npm run setup-mcp
+
+# On Windows
+npm run setup-mcp-win
+```
 - Use it to parse natural language queries and call your REST API
 
 ## 📚 References
@@ -238,9 +328,16 @@ This will install:
 CREATE DATABASE whatsapp_db;
 ```
 
-2. Run the schema creation script from `db/setup.sql`:
+2. Run the database setup script using one of these commands:
 ```bash
-psql -U postgres -d whatsapp_db -f db/setup.sql
+# Windows Command Prompt
+npm run setup-db
+
+# Windows PowerShell
+npm run setup-db-ps
+
+# Linux/macOS
+npm run setup-db-sh
 ```
 
 3. Apply database migrations:
@@ -248,7 +345,14 @@ psql -U postgres -d whatsapp_db -f db/setup.sql
 npm run migrate
 ```
 
-4. Create a `.env` file in the root directory with your database and WhatsApp credentials.
+4. Create a `.env` file in the root directory with your database and WhatsApp credentials:
+```bash
+# Windows Command Prompt
+npm run create-env
+
+# Windows PowerShell
+npm run create-env-ps
+```
 
 ### 4. Start the Development Environment
 
@@ -263,13 +367,42 @@ This will start:
 - React frontend on port 3000
 - Hot reloading for both
 
+For development with MCP server:
+
+```bash
+npm run dev-with-mcp
+```
+
+Or start all services with a single script:
+
+```bash
+# Windows Command Prompt
+npm run start-all
+
+# Windows PowerShell
+npm run start-all-ps
+```
+
 ### 5. Access the Application
 
 The admin dashboard is available at: http://localhost:3000
 
 ### 6. Testing WhatsApp Integration
 
-Use ngrok to expose your localhost and configure webhook URLs in the Meta Developer Console.
+Use ngrok to expose your localhost:
+
+```bash
+# Windows Command Prompt
+npm run start-ngrok
+
+# Windows PowerShell
+npm run start-ngrok-ps
+
+# Linux/macOS
+npm run start-ngrok-sh
+```
+
+Then configure webhook URLs in the Meta Developer Console.
 
 ## ✅ MCP Server Integration
 
@@ -279,13 +412,11 @@ This project integrates with the [WhatsApp MCP server](https://github.com/msaeli
 
 The easiest way to set up the MCP server is using our provided scripts:
 
-**On Linux/macOS:**
 ```bash
+# On Linux/macOS
 npm run setup-mcp
-```
 
-**On Windows:**
-```bash
+# On Windows
 npm run setup-mcp-win
 ```
 
@@ -339,17 +470,7 @@ npm run start-mcp
 npm run dev
 ```
 
-### 4. Testing MCP Integration
-
-We provide a test script to verify the MCP integration:
-
-```bash
-npm run test-mcp
-```
-
-This will test both direct connection to the MCP server and the integration through our API.
-
-### 5. Understanding MCP Flow
+### 4. Understanding MCP Flow
 
 The message processing flow with MCP is:
 
@@ -360,9 +481,9 @@ The message processing flow with MCP is:
 5. Our server processes the intent (e.g., check order status)
 6. A response is sent back to the user
 
-See the flow diagram in the `mcp-flow.txt` file for a visual representation.
+See the flow diagram in the `config/mcp-flow.txt` file for a visual representation.
 
-### 6. Training the MCP Server
+### 5. Training the MCP Server
 
 You can train the MCP server with new examples through the API:
 
@@ -395,7 +516,7 @@ The system comes pre-configured with basic examples for:
 - Greetings and thank you messages
 - General inquiries
 
-### 7. MCP API Endpoints
+### 6. MCP API Endpoints
 
 The following MCP-related endpoints are available:
 
@@ -405,14 +526,14 @@ The following MCP-related endpoints are available:
 | GET    | `/api/mcp/status` | Get MCP server connection status |
 | POST   | `/api/mcp/test`   | Test message processing with MCP |
 
-### 8. Database Schema for MCP
+### 7. Database Schema for MCP
 
 This integration adds two new tables to the database:
 
 - `mcp_sessions`: Stores user conversation context
 - `mcp_training_logs`: Logs MCP training activity
 
-### 9. Available Intents
+### 8. Available Intents
 
 The system recognizes the following intents out of the box:
 
