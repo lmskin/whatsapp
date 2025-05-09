@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
@@ -10,7 +10,20 @@ import SendMessage from './pages/SendMessage';
 // Import components
 import Navbar from './components/Navbar';
 
+// Import socket service
+import { initSocket, disconnectSocket } from './services/socketService';
+
 function App() {
+  useEffect(() => {
+    // Initialize socket connection
+    initSocket();
+    
+    // Cleanup on unmount
+    return () => {
+      disconnectSocket();
+    };
+  }, []);
+
   return (
     <Router>
       <div className="App">

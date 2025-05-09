@@ -46,12 +46,12 @@ exports.handleIncomingMessage = async (req, res) => {
         
         // Process delivery status updates
         for (const status of statuses) {
-          await processStatusUpdate(status);
+          await processStatusUpdate(status, req.app.get('io'));
         }
         
         // Process incoming messages
         for (const message of messages) {
-          await processIncomingMessage(message, value.contacts);
+          await processIncomingMessage(message, value.contacts, req.app.get('io'));
         }
       }
     }
@@ -65,7 +65,7 @@ exports.handleIncomingMessage = async (req, res) => {
 };
 
 // Process message status updates
-async function processStatusUpdate(status) {
+async function processStatusUpdate(status, io) {
   try {
     const statusType = status.status;
     const messageId = status.id;
@@ -74,13 +74,18 @@ async function processStatusUpdate(status) {
     
     // Update message status in database if needed
     // await messageService.updateMessageStatus(messageId, statusType);
+    
+    // Emit status update via Socket.IO
+    if (io) {
+      io.emit('message-status-update', { messageId, status: statusType });
+    }
   } catch (error) {
     console.error('Error processing status update:', error);
   }
 }
 
 // Process incoming messages
-async function processIncomingMessage(message, contacts) {
+async function processIncomingMessage(message, contacts, io) {
   try {
     const phone = message.from;
     const contactInfo = contacts?.[0] || {};
@@ -124,13 +129,18 @@ async function processIncomingMessage(message, contacts) {
     console.log(`Received message: ${messageContent} from ${phone}`);
     
     // Save the incoming message
-    await messageService.saveMessage({
+    const savedMessage = await messageService.saveMessage({
       wa_user_id: phone,
       wa_message_id: messageId,
       content: messageContent,
       message_type: messageType,
       is_outgoing: false
     });
+    
+    // Emit the new message via Socket.IO
+    if (io) {
+      io.emit('new-message', savedMessage);
+    }
     
     // Process the message using MCP service
     const responseMessage = await mcpService.processMessage(phone, messageContent);
@@ -140,13 +150,18 @@ async function processIncomingMessage(message, contacts) {
       const response = await whatsappService.sendMessage(phone, responseMessage);
       
       // Save the outgoing message
-      await messageService.saveMessage({
+      const savedResponse = await messageService.saveMessage({
         wa_user_id: phone,
         wa_message_id: response.messages?.[0]?.id,
         content: responseMessage,
         message_type: 'text',
         is_outgoing: true
       });
+      
+      // Also emit the response message
+      if (io) {
+        io.emit('new-message', savedResponse);
+      }
     }
   } catch (error) {
     console.error('Error processing incoming message:', error);

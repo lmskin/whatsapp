@@ -53,6 +53,12 @@ exports.sendMessage = async (req, res) => {
       status: 'sent'
     });
     
+    // Emit the new message via Socket.IO
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('new-message', savedMessage);
+    }
+    
     return res.status(200).json({
       success: true,
       messageId: savedMessage.id,
@@ -61,5 +67,19 @@ exports.sendMessage = async (req, res) => {
   } catch (error) {
     console.error('Error in sendMessage controller:', error);
     return res.status(500).json({ error: 'Failed to send message' });
+  }
+};
+
+/**
+ * Get message statistics (counts)
+ */
+exports.getStats = async (req, res) => {
+  try {
+    const stats = await messageService.getMessageStats();
+    
+    return res.status(200).json(stats);
+  } catch (error) {
+    console.error('Error in getStats controller:', error);
+    return res.status(500).json({ error: 'Failed to fetch message statistics' });
   }
 }; 

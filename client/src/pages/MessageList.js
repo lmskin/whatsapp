@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { initSocket, subscribeToNewMessages, disconnectSocket } from '../services/socketService';
 
 const MessageList = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch initial messages
     const fetchMessages = async () => {
       try {
         const res = await axios.get('/api/messages');
-        setMessages(res.data.data || []);
+        setMessages(res.data || []);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -18,6 +20,25 @@ const MessageList = () => {
     };
 
     fetchMessages();
+
+    // Initialize socket connection and subscribe to new messages
+    initSocket();
+    subscribeToNewMessages((newMessage) => {
+      setMessages((prevMessages) => {
+        // Check if message already exists
+        const exists = prevMessages.some(msg => msg.id === newMessage.id);
+        if (exists) {
+          return prevMessages;
+        }
+        // Add new message to the top of the list
+        return [newMessage, ...prevMessages];
+      });
+    });
+
+    // Cleanup function to disconnect socket
+    return () => {
+      disconnectSocket();
+    };
   }, []);
 
   const formatTimestamp = (timestamp) => {

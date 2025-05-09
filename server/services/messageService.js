@@ -118,4 +118,30 @@ exports.getConversationThreads = async () => {
     console.error('Error getting conversation threads:', error);
     throw error;
   }
+};
+
+/**
+ * Get message stats (count of messages and unique users)
+ * @returns {Promise<Object>} - Stats object with counts
+ */
+exports.getMessageStats = async () => {
+  try {
+    // Get total message count
+    const countQuery = 'SELECT COUNT(*) AS total FROM messages';
+    const countResult = await pool.query(countQuery);
+    const totalMessages = parseInt(countResult.rows[0].total) || 0;
+    
+    // Get unique user count
+    const uniqueQuery = 'SELECT COUNT(DISTINCT wa_user_id) AS total FROM messages';
+    const uniqueResult = await pool.query(uniqueQuery);
+    const totalUsers = parseInt(uniqueResult.rows[0].total) || 0;
+    
+    return {
+      totalMessages,
+      totalUsers
+    };
+  } catch (error) {
+    console.error('Error getting message stats:', error);
+    throw error;
+  }
 }; 

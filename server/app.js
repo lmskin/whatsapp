@@ -3,6 +3,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
+const socketIo = require('socket.io');
 
 // Check if .env exists, otherwise use .env-example
 const envPath = fs.existsSync(path.resolve(__dirname, '../.env')) 
@@ -21,6 +23,17 @@ const mcpRoutes = require('./routes/mcp');
 const mcpService = require('./services/mcpService');
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+// Make io accessible to our router
+app.set('io', io);
+
 const PORT = process.env.PORT || 3001;
 
 // Middleware
@@ -32,14 +45,24 @@ app.use('/api', messageRoutes);
 app.use('/webhook', webhookRoutes);
 app.use('/api/mcp', mcpRoutes);
 
+// Socket.IO connection handler
+io.on('connection', (socket) => {
+  console.log('New client connected');
+  
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
+
 // Basic route for testing
 app.get('/', (req, res) => {
   res.send('WhatsApp Integration API is running');
 });
 
 // Start server
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Socket.IO enabled for real-time messaging`);
   console.log(`MCP Server integration configured at: ${process.env.MCP_ENDPOINT || 'http://localhost:4000'}`);
   console.log(`WhatsApp verify token: ${process.env.WA_VERIFY_TOKEN}`);
   console.log(`WhatsApp API version: ${process.env.WA_API_VERSION}`);
@@ -53,4 +76,4 @@ app.listen(PORT, async () => {
   }
 });
 
-module.exports = app; 
+module.exports = { app, server, io }; 

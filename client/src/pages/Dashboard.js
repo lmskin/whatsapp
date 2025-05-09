@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { subscribeToNewMessages, initSocket, disconnectSocket } from '../services/socketService';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -7,32 +8,68 @@ const Dashboard = () => {
     totalUsers: 0
   });
   const [loading, setLoading] = useState(true);
-
+  const knownUsers = useRef(new Set());
+  
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // In a real app, you would have an API endpoint for stats
-        const messages = await axios.get('/api/messages');
+        // Fetch stats from the dedicated endpoint
+        const statsResponse = await axios.get('/api/stats');
+        const statsData = statsResponse.data || { totalMessages: 0, totalUsers: 0 };
         
-        // Count unique users
-        const uniqueUsers = new Set();
-        messages.data.data.forEach(message => {
-          uniqueUsers.add(message.wa_user_id);
-        });
-        
-        setStats({
-          totalMessages: messages.data.data.length || 0,
-          totalUsers: uniqueUsers.size || 0
-        });
-        
+        setStats(statsData);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
+        // Fallback to counting messages manually if stats endpoint fails
+        try {
+          const messagesResponse = await axios.get('/api/messages');
+          const messagesData = messagesResponse.data || [];
+          
+          // Count unique users
+          messagesData.forEach(message => {
+            if (message.wa_user_id) {
+              knownUsers.current.add(message.wa_user_id);
+            }
+          });
+          
+          setStats({
+            totalMessages: messagesData.length || 0,
+            totalUsers: knownUsers.current.size || 0
+          });
+        } catch (err) {
+          console.error('Fallback fetch failed too:', err);
+        }
         setLoading(false);
       }
     };
 
     fetchStats();
+
+    // Initialize socket for real-time updates
+    initSocket();
+    
+    // Listen for new messages to update stats in real-time
+    subscribeToNewMessages((newMessage) => {
+      setStats(prevStats => {
+        let isNewUser = false;
+        
+        if (newMessage.wa_user_id && !knownUsers.current.has(newMessage.wa_user_id)) {
+          knownUsers.current.add(newMessage.wa_user_id);
+          isNewUser = true;
+        }
+        
+        return {
+          totalMessages: prevStats.totalMessages + 1,
+          totalUsers: isNewUser ? prevStats.totalUsers + 1 : prevStats.totalUsers
+        };
+      });
+    });
+
+    // Cleanup
+    return () => {
+      disconnectSocket();
+    };
   }, []);
 
   if (loading) {
