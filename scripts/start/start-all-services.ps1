@@ -36,9 +36,19 @@ $serverProcess = Start-Process -FilePath "cmd" -ArgumentList "/c cd server && np
 # Wait for server to initialize
 Start-Sleep -Seconds 5
 
-# 5. Start client UI
-Write-Host "5. Starting client UI..." -ForegroundColor Cyan
-$clientProcess = Start-Process -FilePath "cmd" -ArgumentList "/c node start-client.js" -WindowStyle Normal -PassThru
+# 5. Start client UI and open in browser
+Write-Host "5. Starting client UI and opening in browser..." -ForegroundColor Cyan
+# Set environment variables but don't set BROWSER=none to allow automatic browser opening
+$env:DANGEROUSLY_DISABLE_HOST_CHECK = "true"
+$env:WDS_SOCKET_HOST = "127.0.0.1"
+$env:WDS_SOCKET_PORT = "0"
+$env:FAST_REFRESH = "false"
+# Start the client process
+$clientProcess = Start-Process -FilePath "cmd" -ArgumentList "/c cd client && npm start" -WindowStyle Normal -PassThru
+# Wait for client to initialize
+Start-Sleep -Seconds 10
+# Explicitly open the browser
+Start-Process "http://localhost:3000"
 
 Write-Host "All services started successfully!" -ForegroundColor Green
 Write-Host "Press Ctrl+C to stop all services" -ForegroundColor Yellow

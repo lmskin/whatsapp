@@ -8,7 +8,6 @@ set "DANGEROUSLY_DISABLE_HOST_CHECK=true"
 set "WDS_SOCKET_HOST=127.0.0.1"
 set "WDS_SOCKET_PORT=0"
 set "FAST_REFRESH=false"
-set "BROWSER=none"
 
 echo Using Node version:
 node --version
@@ -20,8 +19,15 @@ if not exist "node_modules\terser-webpack-plugin" (
 )
 
 echo Starting React application... (This might take a moment)
-npx --no-install react-scripts start
+start "" cmd /c npx --no-install react-scripts start
 
-rem If we get here, there was likely an error
-echo If the application didn't start, check the error messages above.
+rem Wait for the app to initialize before opening browser
+echo Waiting for application to start...
+timeout /t 10 /nobreak > nul
+
+rem Open browser explicitly in case it doesn't open automatically
+start http://localhost:3000
+
+echo Browser should open automatically. If not, visit: http://localhost:3000
+echo Press any key to stop the application when done...
 pause 
